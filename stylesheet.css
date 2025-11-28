@@ -1,0 +1,32 @@
+.calendar-day {
+  width: 80px;
+  height: 80px;
+  /* padding-right: 40px; */
+}
+
+.calendar-day.calendar-weekday {
+  padding: 0px;
+  /* color: red; */
+  /* border: 1px solid red; */
+}
+
+.calendar-day.calendar-weekend {
+  padding: 0px;
+  /* color: green; */
+  /* border: 1px solid red; */
+}
+
+.calendar-day.calendar-today {
+  /* background: yellow; */
+}
+
+.calendar-day-heading {
+  text-align: center;
+  /* background: peru; */
+  margin: 0px;
+  padding: 20px;
+}
+
+/* .notification-banner {
+  border: 1px solid red;
+} */
