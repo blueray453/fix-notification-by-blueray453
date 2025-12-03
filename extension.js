@@ -1,3 +1,4 @@
+import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -37,6 +38,8 @@ export default class NotificationThemeExtension extends Extension {
 
     // journalctl -f -o cat SYSLOG_IDENTIFIER=fix-notification-by-blueray453
     journal(`Enabled`);
+
+    Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
 
     const messageTrayContainer = Main.messageTray.get_first_child();
 
