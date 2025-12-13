@@ -40,10 +40,10 @@ export default class NotificationThemeExtension extends Extension {
     journal(`Enabled`);
 
     this._idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-      this._idleId = null;
       if (Main.messageTray) {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
       }
+      this._idleId = null;
       return GLib.SOURCE_REMOVE;
     });
 
