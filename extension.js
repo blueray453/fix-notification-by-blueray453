@@ -39,14 +39,6 @@ export default class NotificationThemeExtension extends Extension {
     // journalctl -f -o cat SYSLOG_IDENTIFIER=fix-notification-by-blueray453
     journal(`Enabled`);
 
-    this._idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-      if (Main.messageTray) {
-        Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
-      }
-      this._idleId = null;
-      return GLib.SOURCE_REMOVE;
-    });
-
     const messageTrayContainer = Main.messageTray.get_first_child();
 
     this._themeSignalId = messageTrayContainer?.connect("child-added", () => {
@@ -78,11 +70,6 @@ export default class NotificationThemeExtension extends Extension {
   }
 
   disable() {
-    if (this._idleId) {
-      GLib.source_remove(this._idleId);
-      this._idleId = null;
-    }
-
     if (this._themeSignalId) {
       const messageTrayContainer = Main.messageTray.get_first_child();
       messageTrayContainer?.disconnect(this._themeSignalId);
