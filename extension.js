@@ -50,6 +50,7 @@ export default class NotificationThemeExtension extends Extension {
     const messageTrayContainer = Main.messageTray.get_first_child();
 
     this._themeSignalId = messageTrayContainer?.connect("child-added", () => {
+      Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
       const notificationContainer = messageTrayContainer?.get_first_child();
       const notification = notificationContainer?.get_first_child();
 
