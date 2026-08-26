@@ -2,7 +2,13 @@ import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { setLogging, setLogFn, journal } from './utils.js'
+
+import {
+  initLogging,
+  createLogger,
+} from './logger.js';
+
+const journal = createLogger(import.meta.url);
 
 export default class NotificationThemeExtension extends Extension {
   constructor(metadata) {
@@ -11,33 +17,12 @@ export default class NotificationThemeExtension extends Extension {
   }
 
   enable() {
+    initLogging(this.uuid, 'both', false);
+    journal(`Enabled`);
+
     // Main.notify('My Extension', 'This is a notification from my GNOME extension!');
     // global.notify_error("msg", "details");
     // Nothing to do; stylesheet.css handles everything
-
-    setLogFn((msg, error = false) => {
-      let level;
-      if (error) {
-        level = GLib.LogLevelFlags.LEVEL_CRITICAL;
-      } else {
-        level = GLib.LogLevelFlags.LEVEL_MESSAGE;
-      }
-
-      GLib.log_structured(
-        'fix-notification-by-blueray453',
-        level,
-        {
-          MESSAGE: `${msg}`,
-          SYSLOG_IDENTIFIER: 'fix-notification-by-blueray453',
-          CODE_FILE: GLib.filename_from_uri(import.meta.url)[0]
-        }
-      );
-    });
-
-    setLogging(true);
-
-    // journalctl -f -o cat SYSLOG_IDENTIFIER=fix-notification-by-blueray453
-    journal(`Enabled`);
 
     const messageTrayContainer = Main.messageTray.get_first_child();
 
