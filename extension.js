@@ -9,59 +9,92 @@ const journal = createLogger(import.meta.url);
 // ---------------------------------------------------------------------------
 // Tips and reminders.
 //
-// Testing from a looking-glass / debug console:
+// Testing from Looking Glass (Alt+F2, "lg"):
 //
 //     Main.notify('My Extension', 'This is a notification from my GNOME extension!');
 //     global.notify_error("msg", "details");
 //
-// Most of the visual work is done by stylesheet.css. The handler below only
-// removes the timestamp label; everything else (colors, spacing, borders)
-// lives in the stylesheet.
-//
-// To customize further from JS instead of CSS, you can reach into the actor
-// tree the same way onNotificationChildAdded does and call set_style() on the
-// relevant actor. See the commented example at the bottom of
-// onNotificationChildAdded.
+// Most of the visual work is done by stylesheet.css. This file only:
+//   1. forces banners to stay centered, and
+//   2. removes the timestamp label from each banner.
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 // Module state.
-//
-// Everything the extension tracks at runtime lives here, not on the Extension
-// instance. The logic below is plain functions reading and writing this
-// object, so there is exactly one place to look for "what state does this
-// extension keep".
 // ---------------------------------------------------------------------------
 const state = {
-  themeSignalId: 0,
+  bin: null,              // Main.messageTray's banner container (_bannerBin)
+  childAddedId: 0,
+  alignId: 0,
+  originalAlignment: null,
 };
 
 function resetState() {
-  state.themeSignalId = 0;
+  state.bin = null;
+  state.childAddedId = 0;
+  state.alignId = 0;
+  state.originalAlignment = null;
+}
+
+// ---------------------------------------------------------------------------
+// Banner alignment.
+//
+// MessageTray.bannerAlignment is only a JS getter/setter wrapping
+// _bannerBin.set_x_align(), so it emits no signal. We watch the real
+// GObject property 'x-align' on _bannerBin instead.
+//
+// If something else (another extension, a theme tweak) pushes the banners to
+// the left, we log a stack trace showing who did it, then re-center.
+// ---------------------------------------------------------------------------
+
+function enforceCenterAlignment() {
+  const bin = Main.messageTray?._bannerBin;
+  if (!bin) {
+    journal('messageTray._bannerBin not found; cannot enforce alignment');
+    return;
+  }
+
+  state.bin = bin;
+  state.originalAlignment = bin.x_align;
+  bin.x_align = Clutter.ActorAlign.CENTER;
+
+  state.alignId = bin.connect('notify::x-align', () => {
+    if (bin.x_align === Clutter.ActorAlign.CENTER) return;
+
+    journal(`x-align changed to ${bin.x_align}\n${new Error().stack}`);
+    bin.x_align = Clutter.ActorAlign.CENTER;
+  });
+}
+
+function releaseAlignment() {
+  const bin = state.bin;
+  if (!bin) return;
+
+  try {
+    if (state.alignId) bin.disconnect(state.alignId);
+    if (state.originalAlignment !== null) bin.x_align = state.originalAlignment;
+  } catch (e) {
+    // Container may already be gone if the shell is shutting down.
+  }
+  state.alignId = 0;
 }
 
 // ---------------------------------------------------------------------------
 // Notification banner restyling.
 //
-// The whole reason for the child-added signal is that the notification
-// banner's internal actor tree is only fully built once the banner has been
-// added to the message tray container. At that point we reach in and drop
+// The child-added signal fires when a banner is added to the tray container,
+// at which point its internal actor tree is fully built. We reach in and drop
 // the timestamp label; stylesheet.css does the rest.
 //
-// The index-based traversal below is fragile — it mirrors the actor tree of
-// GNOME Shell's NotificationBanner as of the shell version this extension
-// targets. If the shell reorders any of these children, the handler will
-// silently no-op (all the ?. chains short-circuit) rather than throw. If
-// that happens, this is the block to update.
-//
-// To find the right indices on a new shell version, use Looking Glass
-// (Alt+F2, "lg") to inspect Main.messageTray.get_first_child() and walk
-// the children until you find the label you want to reach.
+// The index-based traversal is fragile: it mirrors the actor tree of GNOME
+// Shell's NotificationBanner for the targeted shell version. If the shell
+// reorders these children, the ?. chains short-circuit and the handler
+// silently no-ops. If that happens, this is the block to update. Use
+// Looking Glass to inspect Main.messageTray.get_first_child() and walk the
+// children to find the label.
 // ---------------------------------------------------------------------------
 
 function onNotificationChildAdded(messageTrayContainer) {
-  Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
-
   const notificationContainer = messageTrayContainer?.get_first_child();
   const notification = notificationContainer?.get_first_child();
 
@@ -98,44 +131,44 @@ function onNotificationChildAdded(messageTrayContainer) {
 }
 
 function attachToMessageTray() {
-  const messageTrayContainer = Main.messageTray.get_first_child();
-  if (!messageTrayContainer) return;
+  const container = state.bin ?? Main.messageTray?.get_first_child();
+  if (!container) return;
 
-  state.themeSignalId = messageTrayContainer.connect('child-added', () => {
-    onNotificationChildAdded(messageTrayContainer);
+  state.bin = container;
+  state.childAddedId = container.connect('child-added', () => {
+    onNotificationChildAdded(container);
   });
 }
 
 function detachFromMessageTray() {
-  if (!state.themeSignalId) return;
+  const container = state.bin;
+  if (!container || !state.childAddedId) return;
 
-  const messageTrayContainer = Main.messageTray.get_first_child();
   try {
-    messageTrayContainer?.disconnect(state.themeSignalId);
+    container.disconnect(state.childAddedId);
   } catch (e) {
     // Container may already be gone if the shell is shutting down.
   }
-  state.themeSignalId = 0;
+  state.childAddedId = 0;
 }
 
 // ---------------------------------------------------------------------------
 // Extension entry point.
-//
-// This class exists only because GNOME Shell requires an Extension subclass
-// and because enable/disable hooks and this.uuid come from it. All the real
-// work is done by the module-level functions above.
 // ---------------------------------------------------------------------------
 
 export default class NotificationThemeExtension extends Extension {
   enable() {
-    initLogging(this.uuid, 'both', false);
+    initLogging(this.uuid, 'file', false);
     journal(`Enabled`);
 
     resetState();
+    enforceCenterAlignment();
     attachToMessageTray();
   }
 
   disable() {
     detachFromMessageTray();
+    releaseAlignment();
+    resetState();
   }
 }
