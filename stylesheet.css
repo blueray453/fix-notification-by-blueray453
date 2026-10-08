@@ -1,0 +1,99 @@
+/* ===== Lock screen notifications ===== */
+.unlock-dialog-notifications-container {
+  margin: 16px;
+  spacing: 8px;
+}
+
+.unlock-dialog-notifications-container .message,
+.unlock-dialog-notifications-container .unlock-dialog-notification-source {
+  background-color: rgba(7, 54, 66, 0.85); /* base02 */
+  color: #93a1a1;                          /* base1 */
+  border: 1px solid #586e75;               /* base01 */
+  border-radius: 18px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* Critical notifications get a red edge */
+.unlock-dialog-notifications-container .message.critical,
+.unlock-dialog-notifications-container .unlock-dialog-notification-source.critical {
+  background-color: rgba(7, 54, 66, 0.95);
+  border-color: #dc322f;
+}
+
+.unlock-dialog-notifications-container .message .message-header {
+  color: #eee8d5;
+}
+
+.unlock-dialog-notification-icon {
+  icon-size: 28px;
+}
+
+.unlock-dialog-notification-label {
+  color: #eee8d5;
+  font-weight: 600;
+  padding-left: 12px;
+  padding-right: 0;
+}
+
+.unlock-dialog-notification-label:rtl {
+  padding-left: 0;
+  padding-right: 12px;
+}
+
+.unlock-dialog-notification-count-text {
+  background-color: #cb4b16; /* orange, so unread counts stand out */
+  color: #fdf6e3;
+  font-weight: bold;
+  padding: 0 10px;
+  border-radius: 999px;
+}
+
+/* Buttons inside lock screen messages (e.g. media controls) */
+.unlock-dialog-notifications-container .message StButton {
+  color: #93a1a1;
+  background-color: transparent;
+}
+
+.unlock-dialog-notifications-container .message StButton:hover,
+.unlock-dialog-notifications-container .message StButton:focus {
+  color: #2aa198;
+  background-color: rgba(42, 161, 152, 0.15);
+}
+
+/* ===== Banner notifications (desktop only, not the lock screen) ===== */
+.notification-banner {
+  background-color: #073642;
+  color: #93a1a1;
+  border: 1px solid #586e75;
+  border-radius: 18px;
+  margin: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.notification-banner .message-title,
+.notification-banner .message-header {
+  color: #eee8d5;
+  font-weight: 700;
+}
+
+.notification-banner .message-body {
+  color: #93a1a1;
+}
+
+.notification-banner .notification-button {
+  background-color: #002b36;
+  color: #93a1a1;
+  border-top: 1px solid #586e75;
+}
+
+.notification-banner .notification-button:hover,
+.notification-banner .notification-button:focus {
+  background-color: #073642;
+  color: #2aa198;
+}
+
+.notification-banner .notification-button:active {
+  background-color: #268bd2;
+  color: #fdf6e3;
+}
