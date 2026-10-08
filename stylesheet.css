@@ -42,11 +42,11 @@
 }
 
 .unlock-dialog-notification-count-text {
-  background-color: #cb4b16; /* orange, so unread counts stand out */
-  color: #fdf6e3;
+  background-color: rgba(88, 110, 117, 0.35); /* base01, subtle */
+  color: #eee8d5;
   font-weight: bold;
-  padding: 0 10px;
-  border-radius: 999px;
+  padding: 2px 10px;
+  border-radius: 12px;
 }
 
 /* Buttons inside lock screen messages (e.g. media controls) */
