@@ -1,4 +1,4 @@
-/* ===== Lock screen notifications ===== */
+/* ---------- Lock screen notifications ---------- */
 .unlock-dialog-notifications-container {
   margin: 16px;
   spacing: 8px;
@@ -61,39 +61,29 @@
   background-color: rgba(42, 161, 152, 0.15);
 }
 
-/* ===== Banner notifications (desktop only, not the lock screen) ===== */
+/* =====================================================================
+   Banner notifications (desktop only, not the lock screen)
+   =====================================================================
+   A banner is itself a .message, so background, border, border-radius,
+   colour and padding already come from the .message rule above. Only
+   the banner-specific extras live here.
+
+   The header rule uses `.message.notification-banner` so it outranks
+   `.message .message-header` regardless of where it sits in the file.
+
+   Action buttons on banners are styled by
+   `.message .message-action-bin StButton` above; that selector already
+   carries an element selector and wins over any plain
+   `.notification-banner .notification-button` rule, so no banner-specific
+   button overrides are needed.
+*/
+
 .notification-banner {
-  background-color: #073642;
-  color: #93a1a1;
-  border: 1px solid #586e75;
-  border-radius: 18px;
   margin: 8px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
 }
 
-.notification-banner .message-title,
-.notification-banner .message-header {
+.message.notification-banner .message-header {
   color: #eee8d5;
   font-weight: 700;
-}
-
-.notification-banner .message-content {
-  color: #93a1a1;
-}
-
-.notification-banner .notification-button {
-  background-color: #002b36;
-  color: #93a1a1;
-  border-top: 1px solid #586e75;
-}
-
-.notification-banner .notification-button:hover,
-.notification-banner .notification-button:focus {
-  background-color: #073642;
-  color: #2aa198;
-}
-
-.notification-banner .notification-button:active {
-  background-color: #268bd2;
-  color: #fdf6e3;
 }
